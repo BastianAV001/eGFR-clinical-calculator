@@ -50,3 +50,92 @@ def calcular_egfr(edad: int, scr: float, sexo: str) -> float:
 
     # Retorno con precisión para QA
     return round(egfr, 2)
+
+# Interpretación Clínica: Clasificación de estadios según guías KDIGO
+def clasificar_categoria_kdigo(egfr: float) -> dict:
+    """
+    Clasifica la categoría de eGFR (G1-G5) según KDIGO 2012 y proporciona
+    soporte a la decisión clínica (CDSS).
+
+    Args:
+        egfr (float): El valor de la Tasa de Filtración Glomerular estimada.
+
+    Returns:
+        dict: Un diccionario con la categoría, descripción, estatus de ERC y recomendación clínica.
+    """
+    if egfr >= 90:
+        return {
+            "categoria": "G1",
+            "descripcion": "eGFR Normal o Alto",
+            "estatus_erc": "Ausencia de ERC por eGFR aislado. El diagnóstico requiere evidencia de daño renal (ej. albuminuria ≥ 30 mg/g, anomalías estructurales o sedimento urinario anormal) por > 3 meses.",
+            "accion_clinica": "Control preventivo rutinario. Monitoreo anual solo si existen factores de riesgo (diabetes, hipertensión, antecedentes familiares)."
+        }
+    elif egfr >= 60:
+        return {
+            "categoria": "G2",
+            "descripcion": "Disminución Leve del eGFR",
+            "estatus_erc": "Ausencia de ERC por eGFR aislado. El diagnóstico requiere marcadores de daño renal persistentes por > 3 meses.",
+            "accion_clinica": "Evaluar comorbilidades y riesgo cardiovascular. Sin derivación a nefrología a menos que exista proteinuria significativa."
+        }
+    elif egfr >= 45:
+        return {
+            "categoria": "G3a",
+            "descripcion": "Disminución Leve a Moderada",
+            "estatus_erc": "Confirma diagnóstico de Enfermedad Renal Crónica (independiente de otros marcadores).",
+            "accion_clinica": "Monitoreo clínico cada 6 meses. Estricto control de presión arterial y ajuste de dosis de fármacos nefrotóxicos."
+        }
+    elif egfr >= 30:
+        return {
+            "categoria": "G3b",
+            "descripcion": "Disminución Moderada a Severa",
+            "estatus_erc": "Confirma diagnóstico de Enfermedad Renal Crónica. Alto riesgo de progresión.",
+            "accion_clinica": "Derivación a nefrología recomendada. Evaluar activamente complicaciones asociadas (anemia, metabolismo óseo-mineral)."
+        }
+    elif egfr >= 15:
+        return {
+            "categoria": "G4",
+            "descripcion": "Disminución Severa",
+            "estatus_erc": "Confirma diagnóstico de Enfermedad Renal Crónica (Etapa Pre-diálisis).",
+            "accion_clinica": "Derivación urgente a nefrología. Requiere preparación multidisciplinaria para futura Terapia de Reemplazo Renal (TRR)."
+        }
+    else:
+        return {
+            "categoria": "G5",
+            "descripcion": "Falla Renal",
+            "estatus_erc": "Enfermedad Renal Crónica Terminal.",
+            "accion_clinica": "Manejo nefrológico activo para Terapia de Reemplazo Renal (diálisis/trasplante) o cuidados paliativos conservadores."
+        }
+
+
+def evaluar_riesgo_contraste(egfr: float) -> dict:
+    """
+    Evalúa el riesgo de administrar medios de contraste yodados (TC) y 
+    basados en gadolinio (RM) según la TFG estimada (Consenso ACR/ESUR).
+    
+    Args:
+        egfr (float): El valor de la TFG estimada.
+        
+    Returns:
+        dict: Nivel de riesgo, código de color para la interfaz y protocolos para TC y RM.
+    """
+    if egfr >= 45:
+        return {
+            "nivel_riesgo": "Bajo",
+            "color_alerta": "verde",  # Para que el frontend pinte la alerta de verde
+            "yodo_tc": "Seguro. Riesgo mínimo de Nefropatía Inducida por Contraste (NIC). Proceder con protocolo estándar.",
+            "gadolinio_rm": "Seguro. Riesgo extremadamente bajo de Fibrosis Sistémica Nefrogénica (FSN)."
+        }
+    elif egfr >= 30:
+        return {
+            "nivel_riesgo": "Moderado",
+            "color_alerta": "naranja",  # Para que el frontend pinte la alerta de naranja/amarillo
+            "yodo_tc": "Precaución. Riesgo moderado de NIC. Se recomienda protocolo de profilaxis (ej. hidratación con suero fisiológico) y suspender fármacos nefrotóxicos temporales.",
+            "gadolinio_rm": "Precaución. Utilizar exclusivamente agentes de gadolinio de Grupo II (macrocíclicos). Evaluar relación riesgo/beneficio."
+        }
+    else:
+        return {
+            "nivel_riesgo": "Alto",
+            "color_alerta": "rojo",  # Para que el frontend pinte la alerta de rojo intenso
+            "yodo_tc": "Alerta Clínica: Alto riesgo de NIC. Buscar alternativas de imagen sin contraste. Si el examen es de urgencia vital, requiere hidratación estricta y monitoreo nefrológico.",
+            "gadolinio_rm": "Contraindicación: Riesgo severo de FSN. Los agentes de Grupo I están absolutamente contraindicados. Buscar alternativas diagnósticas."
+        }

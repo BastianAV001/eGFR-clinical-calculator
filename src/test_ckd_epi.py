@@ -4,7 +4,7 @@ Utiliza el framework nativo 'unittest' de Python.
 """
 
 import unittest
-from ckd_epi import calcular_egfr
+from ckd_epi import calcular_egfr, clasificar_categoria_kdigo, evaluar_riesgo_contraste
 
 class TestCalculadoraCKDEPI(unittest.TestCase):
     
@@ -42,5 +42,28 @@ class TestCalculadoraCKDEPI(unittest.TestCase):
         with self.assertRaises(ValueError):
             calcular_egfr(30, 1.0, "X")
 
+    def test_clasificar_categoria_kdigo(self):
+        """Valida que los cortes de las categorías KDIGO sean matemáticamente exactos."""
+        self.assertEqual(clasificar_categoria_kdigo(95)["categoria"], "G1")
+        self.assertEqual(clasificar_categoria_kdigo(65)["categoria"], "G2")
+        self.assertEqual(clasificar_categoria_kdigo(50)["categoria"], "G3a")
+        self.assertEqual(clasificar_categoria_kdigo(35)["categoria"], "G3b")
+        self.assertEqual(clasificar_categoria_kdigo(20)["categoria"], "G4")
+        self.assertEqual(clasificar_categoria_kdigo(10)["categoria"], "G5")
+
+    def test_evaluar_riesgo_contraste(self):
+        """Valida que los protocolos radiológicos entreguen el nivel y color correcto."""
+        # Riesgo Bajo (>= 45)
+        self.assertEqual(evaluar_riesgo_contraste(50)["nivel_riesgo"], "Bajo")
+        self.assertEqual(evaluar_riesgo_contraste(50)["color_alerta"], "verde")
+        
+        # Riesgo Moderado (30 - 44)
+        self.assertEqual(evaluar_riesgo_contraste(35)["nivel_riesgo"], "Moderado")
+        self.assertEqual(evaluar_riesgo_contraste(35)["color_alerta"], "naranja")
+        
+        # Riesgo Alto (< 30)
+        self.assertEqual(evaluar_riesgo_contraste(25)["nivel_riesgo"], "Alto")
+        self.assertEqual(evaluar_riesgo_contraste(25)["color_alerta"], "rojo")
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
