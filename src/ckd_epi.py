@@ -18,8 +18,7 @@ def calcular_egfr(edad: int, scr: float, sexo: str) -> float:
     Raises:
         ValueError: Si los parámetros de entrada están fuera de los rangos clínicos válidos.
     """
-    
-    # Validación de entradas (Guard Clauses)
+        
     if not isinstance(edad, int) or edad < 18 or edad > 120: 
         raise ValueError("Error Clínico: La edad debe ser un número entero entre 18 y 120 años. (Fórmula no validada para pediatría).")
     
@@ -29,29 +28,25 @@ def calcular_egfr(edad: int, scr: float, sexo: str) -> float:
     sexo = sexo.upper()
     if sexo not in ["M", "F"]:
         raise ValueError("Error de Parámetro: El sexo para este modelo matemático debe ser 'M' o 'F'.")
-
-    # Asignación de constantes según el sexo
+    
     if sexo == "F":
         kappa = 0.7
         alpha = -0.241
         factor_sexo = 1.012
-    else:  # sexo == "M"
+    else:  
         kappa = 0.9
         alpha = -0.302
         factor_sexo = 1.000
 
-    # Lógica matemática de proporciones (min / max)
+    
     proporcion_scr = scr / kappa
     valor_min = min(proporcion_scr, 1.0)
     valor_max = max(proporcion_scr, 1.0)
 
-    # Ecuación principal CKD-EPI 2021
     egfr = 142 * (valor_min ** alpha) * (valor_max ** -1.200) * (0.9938 ** edad) * factor_sexo
 
-    # Retorno con precisión para QA
     return round(egfr, 2)
 
-# Interpretación Clínica: Clasificación de estadios según guías KDIGO
 def clasificar_categoria_kdigo(egfr: float) -> dict:
     """
     Clasifica la categoría de eGFR (G1-G5) según KDIGO 2012 y proporciona
@@ -121,21 +116,21 @@ def evaluar_riesgo_contraste(egfr: float) -> dict:
     if egfr >= 45:
         return {
             "nivel_riesgo": "Bajo",
-            "color_alerta": "verde",  # Para que el frontend pinte la alerta de verde
+            "color_alerta": "verde", 
             "yodo_tc": "Seguro. Riesgo mínimo de Nefropatía Inducida por Contraste (NIC). Proceder con protocolo estándar.",
             "gadolinio_rm": "Seguro. Riesgo extremadamente bajo de Fibrosis Sistémica Nefrogénica (FSN)."
         }
     elif egfr >= 30:
         return {
             "nivel_riesgo": "Moderado",
-            "color_alerta": "naranja",  # Para que el frontend pinte la alerta de naranja/amarillo
+            "color_alerta": "naranja",  
             "yodo_tc": "Precaución. Riesgo moderado de NIC. Se recomienda protocolo de profilaxis (ej. hidratación con suero fisiológico) y suspender fármacos nefrotóxicos temporales.",
             "gadolinio_rm": "Precaución. Utilizar exclusivamente agentes de gadolinio de Grupo II (macrocíclicos). Evaluar relación riesgo/beneficio."
         }
     else:
         return {
             "nivel_riesgo": "Alto",
-            "color_alerta": "rojo",  # Para que el frontend pinte la alerta de rojo intenso
+            "color_alerta": "rojo",  
             "yodo_tc": "Alerta Clínica: Alto riesgo de NIC. Buscar alternativas de imagen sin contraste. Si el examen es de urgencia vital, requiere hidratación estricta y monitoreo nefrológico.",
             "gadolinio_rm": "Contraindicación: Riesgo severo de FSN. Los agentes de Grupo I están absolutamente contraindicados. Buscar alternativas diagnósticas."
         }
