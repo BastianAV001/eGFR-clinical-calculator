@@ -6,6 +6,7 @@ st.set_page_config(page_title="Calculadora eGFR & Contraste", page_icon="⚕️"
 st.markdown("""
     <style>
     h1, h2, h3 { color: #0A2240; }
+    
     .stButton>button {
         background-color: #0A2240;
         color: white;
@@ -15,7 +16,24 @@ st.markdown("""
         transition: 0.3s;
     }
     .stButton>button:hover { background-color: #C28840; color: white; }
-    /* Reducir el padding superior para ganar espacio visual */
+    
+    [data-testid="stFormSubmitButton"] > button {
+        background-color: #0A2240 !important;
+        color: white !important;
+        border-radius: 6px !important;
+        font-weight: bold !important;
+        border: none !important;
+        transition: 0.3s !important;
+    }
+    [data-testid="stFormSubmitButton"] > button:hover { 
+        background-color: #C28840 !important; 
+        color: white !important; 
+    }
+    
+    div[data-testid="InputInstructions"] {
+        display: none !important;
+    }
+    
     .block-container { padding-top: 2rem; padding-bottom: 1rem; }
     </style>
 """, unsafe_allow_html=True)
@@ -31,16 +49,19 @@ tab1, tab2, tab3, tab4 = st.tabs([
 ])
 
 with tab1:
-    col1, col2, col3 = st.columns(3)
+    with st.form("calculadora_form"):
+        col1, col2, col3 = st.columns(3)
 
-    with col1:
-        edad = st.number_input("Edad (años)", min_value=18, max_value=120, value=40)
-    with col2:
-        sexo = st.selectbox("Sexo Biológico", ["Masculino", "Femenino"])
-    with col3:
-        scr = st.number_input("Creatinina (mg/dL)", min_value=0.1, max_value=15.0, value=1.0, step=0.1)
-    
-    if st.button("Evaluar Riesgo Radiológico", use_container_width=True):
+        with col1:
+            edad = st.number_input("Edad (años)", min_value=18, max_value=120, value=40)
+        with col2:
+            sexo = st.selectbox("Sexo Biológico", ["Masculino", "Femenino"])
+        with col3:
+            scr = st.number_input("Creatinina (mg/dL)", min_value=0.1, max_value=15.0, value=1.0, step=0.1)
+        
+        submit_buttolosn = st.form_submit_button("Evaluar Riesgo Renal por Contraste", use_container_width=True)
+
+    if submit_button:
         try:
             sexo_formateado = 'M' if sexo == "Masculino" else 'F'
             
@@ -57,7 +78,7 @@ with tab1:
                 st.info(f"**{kdigo_data['categoria']}: {kdigo_data['descripcion']}**\n\n*{kdigo_data['estatus_erc']}*\n\n**Acción:** {kdigo_data['accion_clinica']}")
                 
             with col_radio:
-                st.markdown(f"**☢️ Riesgo Contraste: {riesgo_data['nivel_riesgo']}**")
+                st.markdown(f"**⚠️ Seguridad de Contraste IV: {riesgo_data['nivel_riesgo']}**")
                 texto_radio = f"**TC (Yodo):** {riesgo_data['yodo_tc']}\n\n**RM (Gadolinio):** {riesgo_data['gadolinio_rm']}"
                 
                 if riesgo_data['color_alerta'] == "verde":
